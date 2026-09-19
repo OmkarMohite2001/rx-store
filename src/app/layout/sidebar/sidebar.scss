@@ -1,0 +1,13 @@
+mat-nav-list {
+  padding-top: 12px;
+}
+
+a {
+  margin: 4px 8px;
+  border-radius: 8px;
+}
+
+.active-link {
+  background: rgba(0, 0, 0, 0.08);
+  font-weight: 600;
+}

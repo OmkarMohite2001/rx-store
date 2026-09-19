@@ -1,0 +1,15 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.spacer {
+  flex: 1;
+}
