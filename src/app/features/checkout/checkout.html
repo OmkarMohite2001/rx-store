@@ -1,0 +1,113 @@
+<div class="page-header">
+  <div>
+    <h1>Checkout</h1>
+    <p>Sequential order processing with RxJS <code>concatMap</code></p>
+  </div>
+</div>
+
+@if (isEmpty$ | async) {
+  <div class="empty-state">
+    <mat-icon>shopping_cart</mat-icon>
+    <h2>Your cart is empty</h2>
+    <p>Please add products to your cart before proceeding to checkout.</p>
+    <button mat-flat-button color="primary" routerLink="/products">
+      Browse Products
+    </button>
+  </div>
+} @else {
+  <div class="checkout-layout">
+    <!-- Shipping Form -->
+    <div class="form-column">
+      <mat-card class="form-card">
+        <h2>Shipping Address</h2>
+        <form [formGroup]="checkoutForm" (ngSubmit)="onSubmit()">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Full Name</mat-label>
+            <input matInput formControlName="fullName" placeholder="e.g. Emily Smith" />
+            @if (checkoutForm.get('fullName')?.hasError('required')) {
+              <mat-error>Full name is required</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Street Address</mat-label>
+            <input matInput formControlName="address" placeholder="e.g. 123 Main Street" />
+            @if (checkoutForm.get('address')?.hasError('required')) {
+              <mat-error>Address is required</mat-error>
+            }
+          </mat-form-field>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>City</mat-label>
+              <input matInput formControlName="city" placeholder="e.g. Phoenix" />
+              @if (checkoutForm.get('city')?.hasError('required')) {
+                <mat-error>City is required</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Postal Code</mat-label>
+              <input matInput formControlName="postalCode" placeholder="e.g. 85001" />
+              @if (checkoutForm.get('postalCode')?.hasError('required')) {
+                <mat-error>Postal code is required</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="button-row">
+            <button mat-button type="button" routerLink="/cart">
+              Back to Cart
+            </button>
+            <button
+              mat-flat-button
+              color="primary"
+              type="submit"
+              [disabled]="isSubmitting()"
+            >
+              @if (isSubmitting()) {
+                <mat-spinner diameter="20" />
+                <span>Processing Order...</span>
+              } @else {
+                <ng-container>
+                  <mat-icon>check_circle</mat-icon>
+                  <span>Place Order (${{ ((cartTotal$ | async) ?? 0).toFixed(2) }})</span>
+                </ng-container>
+              }
+            </button>
+          </div>
+        </form>
+      </mat-card>
+    </div>
+
+    <!-- Order Items Preview -->
+    <div class="preview-column">
+      <mat-card class="preview-card">
+        <h2>Order Items ({{ (cartCount$ | async) ?? 0 }})</h2>
+        <mat-divider class="divider" />
+
+        @if (items$ | async; as items) {
+          <div class="items-list">
+            @for (item of items; track item.product.id) {
+              <div class="preview-item">
+                <img [src]="item.product.thumbnail" [alt]="item.product.title" class="item-img" />
+                <div class="item-info">
+                  <span class="item-title">{{ item.product.title }}</span>
+                  <span class="item-qty">Qty: {{ item.quantity }} × ${{ item.product.price }}</span>
+                </div>
+                <span class="item-price">${{ (item.product.price * item.quantity).toFixed(2) }}</span>
+              </div>
+            }
+          </div>
+        }
+
+        <mat-divider class="divider" />
+
+        <div class="total-row">
+          <span>Total:</span>
+          <span class="total-price">${{ ((cartTotal$ | async) ?? 0).toFixed(2) }}</span>
+        </div>
+      </mat-card>
+    </div>
+  </div>
+}

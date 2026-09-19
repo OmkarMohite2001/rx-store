@@ -1,0 +1,127 @@
+<div class="page-header">
+  <div>
+    <h1>Product Comparison</h1>
+    <p>Parallel data fetching using RxJS <code>mergeMap</code></p>
+  </div>
+
+  <div class="add-selector">
+    <mat-form-field appearance="outline" class="select-field">
+      <mat-label>Add Product to Compare</mat-label>
+      <mat-select [formControl]="addProductControl" (selectionChange)="addProduct($event.value)">
+        @if (availableProducts$ | async; as products) {
+          @for (p of products; track p.id) {
+            <mat-option [value]="p.id">{{ p.title }} (${{ p.price }})</mat-option>
+          }
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+</div>
+
+@if (loading$ | async) {
+  <div class="loading-state">
+    <mat-spinner diameter="40" />
+    <span>Loading comparison data in parallel via mergeMap...</span>
+  </div>
+}
+
+@if (comparedProducts$ | async; as products) {
+  @if (products.length > 0) {
+    <div class="comparison-table-wrapper">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th class="feature-label">Feature</th>
+            @for (p of products; track p.id) {
+              <th class="product-column-header">
+                <div class="header-card">
+                  <button
+                    mat-icon-button
+                    class="remove-btn"
+                    (click)="removeProduct(p.id)"
+                    aria-label="Remove product"
+                  >
+                    <mat-icon>close</mat-icon>
+                  </button>
+                  <img [src]="p.thumbnail" [alt]="p.title" class="product-thumb" />
+                  <h3>{{ p.title }}</h3>
+                  <p class="brand">{{ p.brand || 'RxStore' }}</p>
+                  <button mat-flat-button color="primary" (click)="addToCart(p)">
+                    <mat-icon>shopping_cart</mat-icon>
+                    Add
+                  </button>
+                </div>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="feature-label">Price</td>
+            @for (p of products; track p.id) {
+              <td class="val-price">${{ p.price }}</td>
+            }
+          </tr>
+          <tr>
+            <td class="feature-label">Rating</td>
+            @for (p of products; track p.id) {
+              <td>
+                <span class="val-rating">★ {{ p.rating }} / 5</span>
+              </td>
+            }
+          </tr>
+          <tr>
+            <td class="feature-label">Stock Status</td>
+            @for (p of products; track p.id) {
+              <td>
+                <span [class.in-stock]="p.stock > 0" [class.out-stock]="p.stock === 0">
+                  {{ p.stock > 0 ? p.stock + ' units' : 'Out of stock' }}
+                </span>
+              </td>
+            }
+          </tr>
+          <tr>
+            <td class="feature-label">Category</td>
+            @for (p of products; track p.id) {
+              <td class="capitalize">{{ p.category }}</td>
+            }
+          </tr>
+          <tr>
+            <td class="feature-label">Brand</td>
+            @for (p of products; track p.id) {
+              <td>{{ p.brand || 'Generic' }}</td>
+            }
+          </tr>
+          <tr>
+            <td class="feature-label">Warranty</td>
+            @for (p of products; track p.id) {
+              <td>{{ p.warrantyInformation || '1 Year' }}</td>
+            }
+          </tr>
+          <tr>
+            <td class="feature-label">Shipping</td>
+            @for (p of products; track p.id) {
+              <td>{{ p.shippingInformation || 'Standard' }}</td>
+            }
+          </tr>
+          <tr>
+            <td class="feature-label">Description</td>
+            @for (p of products; track p.id) {
+              <td class="val-desc">{{ p.description }}</td>
+            }
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <div class="empty-compare">
+      <mat-icon>compare_arrows</mat-icon>
+      <h2>No products to compare</h2>
+      <p>Select products from the catalog or dropdown above to view side-by-side comparison.</p>
+      <button mat-flat-button color="primary" routerLink="/products">
+        Browse Products
+      </button>
+    </div>
+  }
+}
+

@@ -1,1 +1,77 @@
-<p>auth works!</p>
+<div class="auth-container">
+  <mat-card class="auth-card">
+    <div class="card-header">
+      <div class="logo-icon">
+        <mat-icon>lock</mat-icon>
+      </div>
+      <h1>Account Login</h1>
+      <p>RxJS <code>exhaustMap</code> prevents duplicate concurrent submissions</p>
+    </div>
+
+    @if (errorMessage()) {
+      <div class="error-box">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Username</mat-label>
+        <mat-icon matPrefix>person</mat-icon>
+        <input matInput formControlName="username" placeholder="e.g. emilys" />
+        @if (loginForm.get('username')?.hasError('required')) {
+          <mat-error>Username is required</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Password</mat-label>
+        <mat-icon matPrefix>key</mat-icon>
+        <input
+          matInput
+          [type]="hidePassword() ? 'password' : 'text'"
+          formControlName="password"
+          placeholder="e.g. emilyspass"
+        />
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          (click)="hidePassword.set(!hidePassword())"
+          aria-label="Toggle password visibility"
+        >
+          <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        @if (loginForm.get('password')?.hasError('required')) {
+          <mat-error>Password is required</mat-error>
+        }
+      </mat-form-field>
+
+      <div class="demo-hint">
+        <small>Demo credentials: <strong>emilys</strong> / <strong>emilyspass</strong></small>
+        <button mat-button type="button" (click)="fillDemoUser()">
+          Auto-fill Demo
+        </button>
+      </div>
+
+      <button
+        mat-flat-button
+        color="primary"
+        class="submit-button"
+        type="submit"
+        [disabled]="isLoading()"
+      >
+        @if (isLoading()) {
+          <mat-spinner diameter="20" />
+          <span>Authenticating with exhaustMap...</span>
+        } @else {
+          <ng-container>
+            <mat-icon>login</mat-icon>
+            <span>Sign In</span>
+          </ng-container>
+        }
+      </button>
+    </form>
+  </mat-card>
+</div>

@@ -1,45 +1,22 @@
 <div class="page-header">
-
   <div>
-
-    <h1>
-      Products
-    </h1>
-
-    <p>
-      Browse products from RxStore
-    </p>
-
+    <h1>Products</h1>
+    <p>Browse, filter, search, compare, and manage store products</p>
   </div>
-
 </div>
 
-
-<div class="search-section">
-
-  <mat-form-field
-    appearance="outline"
-    class="search-field"
-  >
-
-    <mat-label>
-      Search products
-    </mat-label>
-
-    <mat-icon matPrefix>
-      search
-    </mat-icon>
-
+<!-- Reactive Filter Controls -->
+<div class="filters-bar">
+  <mat-form-field appearance="outline" class="search-field">
+    <mat-label>Search products</mat-label>
+    <mat-icon matPrefix>search</mat-icon>
     <input
       matInput
       type="text"
       [formControl]="searchControl"
-      placeholder="Search by product name"
+      placeholder="e.g. phone, shoes, watch..."
     />
-
-
     @if (searchControl.value) {
-
       <button
         mat-icon-button
         matSuffix
@@ -47,104 +24,175 @@
         aria-label="Clear search"
         (click)="searchControl.setValue('')"
       >
-
-        <mat-icon>
-          close
-        </mat-icon>
-
+        <mat-icon>close</mat-icon>
       </button>
-
     }
-
   </mat-form-field>
 
+  <mat-form-field appearance="outline" class="select-field">
+    <mat-label>Category</mat-label>
+    <mat-select [formControl]="categoryControl">
+      <mat-option value="all">All Categories</mat-option>
+      @if (categories$ | async; as categories) {
+        @for (cat of categories; track cat) {
+          <mat-option [value]="cat">{{ cat }}</mat-option>
+        }
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="select-field">
+    <mat-label>Sort By</mat-label>
+    <mat-select [formControl]="sortControl">
+      <mat-option value="default">Default</mat-option>
+      <mat-option value="price-asc">Price: Low to High</mat-option>
+      <mat-option value="price-desc">Price: High to Low</mat-option>
+      <mat-option value="rating-desc">Highest Rated</mat-option>
+      <mat-option value="title-asc">Alphabetical (A-Z)</mat-option>
+    </mat-select>
+  </mat-form-field>
 </div>
 
+<!-- Bulk Action Toolbar (Phase 9 concatMap demonstration) -->
+@if (selectedProductIds().length > 0) {
+  <div class="bulk-toolbar">
+    <div class="selection-info">
+      <mat-icon>check_circle</mat-icon>
+      <span>{{ selectedProductIds().length }} products selected</span>
+    </div>
 
+    @if (isBulkUpdating()) {
+      <div class="bulk-progress">
+        <mat-spinner diameter="20" />
+        <span>{{ bulkProgress() }}</span>
+      </div>
+    } @else {
+      <div class="bulk-buttons">
+        <button
+          mat-flat-button
+          color="primary"
+          (click)="applyBulkDiscount()"
+        >
+          <mat-icon>local_offer</mat-icon>
+          Apply Bulk 15% Discount (concatMap)
+        </button>
+
+        <button
+          mat-stroked-button
+          (click)="goToCompare()"
+          [disabled]="selectedProductIds().length < 2"
+        >
+          <mat-icon>compare_arrows</mat-icon>
+          Compare Selected (mergeMap)
+        </button>
+
+        <button mat-button (click)="clearSelection()">
+          Cancel
+        </button>
+      </div>
+    }
+  </div>
+}
+
+<!-- Loading Spinner (Phase 6) -->
+@if (loading$ | async) {
+  <div class="loading-state">
+    <mat-spinner diameter="48" />
+    <p>Loading products from DummyJSON API...</p>
+  </div>
+}
+
+<!-- Error banner with reactive Retry button (Phase 6) -->
+@if (error$ | async; as errorMsg) {
+  <div class="error-banner">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ errorMsg }}</span>
+    <button mat-flat-button color="warn" (click)="retry()">
+      Retry
+    </button>
+  </div>
+}
+
+<!-- Products Grid -->
 @if (products$ | async; as products) {
-
   @if (products.length > 0) {
-
     <div class="products-grid">
-
-      @for (
-        product of products;
-        track product.id
-      ) {
-
-        <mat-card class="product-card">
+      @for (product of products; track product.id) {
+        <mat-card class="product-card" [class.selected]="isSelected(product.id)">
+          <div class="card-select-checkbox">
+            <mat-checkbox
+              [checked]="isSelected(product.id)"
+              (change)="toggleSelection(product.id)"
+            />
+          </div>
 
           <img
             mat-card-image
             [src]="product.thumbnail"
             [alt]="product.title"
+            [routerLink]="['/products', product.id]"
+            class="clickable-img"
           />
 
-
           <mat-card-content>
-
-            <h3>
+            <span class="category-tag">{{ product.category }}</span>
+            <h3 class="product-title" [routerLink]="['/products', product.id]">
               {{ product.title }}
             </h3>
 
-            <p class="category">
-              {{ product.category }}
-            </p>
+            <div class="rating-stock">
+              <span class="rating">★ {{ product.rating }}</span>
+              <span class="stock" [class.low]="product.stock < 10">
+                {{ product.stock > 0 ? product.stock + ' in stock' : 'Out of stock' }}
+              </span>
+            </div>
 
-            <p class="description">
-              {{ product.description }}
-            </p>
-
-            <p class="price">
-              ₹{{ product.price }}
-            </p>
-
+            <div class="price-row">
+              <span class="price">${{ product.price }}</span>
+              @if (product.discountPercentage > 0) {
+                <span class="discount">-{{ product.discountPercentage }}%</span>
+              }
+            </div>
           </mat-card-content>
 
-
           <mat-card-actions>
-
             <button
-              matButton
-              [routerLink]="[
-                '/products',
-                product.id
-              ]"
+              mat-button
+              [routerLink]="['/products', product.id]"
             >
-              View Details
+              Details
             </button>
-
-
-            <button matButton>
+            <button
+              mat-flat-button
+              color="primary"
+              (click)="addToCart(product)"
+            >
+              <mat-icon>add_shopping_cart</mat-icon>
               Add to Cart
             </button>
-
           </mat-card-actions>
-
         </mat-card>
-
       }
-
     </div>
 
-  } @else {
-
+    <!-- Server-Side Paginator (Phase 3) -->
+    <mat-paginator
+      class="paginator"
+      [length]="(totalProducts$ | async) ?? 0"
+      [pageSize]="(pageSize$ | async) ?? 12"
+      [pageIndex]="(pageIndex$ | async) ?? 0"
+      [pageSizeOptions]="[8, 12, 24, 48]"
+      [showFirstLastButtons]="true"
+      (page)="onPageChange($event)"
+    />
+  } @else if (!(loading$ | async)) {
     <div class="no-products">
-
-      <mat-icon>
-        search_off
-      </mat-icon>
-
-      <h2>
-        No products found
-      </h2>
-
-      <p>
-        Try another search term.
-      </p>
-
+      <mat-icon>search_off</mat-icon>
+      <h2>No products found</h2>
+      <p>Try adjusting your search query, category, or sorting filters.</p>
+      <button mat-stroked-button (click)="searchControl.setValue(''); categoryControl.setValue('all')">
+        Reset Filters
+      </button>
     </div>
-
   }
-
 }

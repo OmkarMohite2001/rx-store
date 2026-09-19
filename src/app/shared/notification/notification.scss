@@ -1,0 +1,73 @@
+.notification-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 380px;
+}
+
+.notification-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background-color: #ffffff;
+  color: #1e293b;
+  animation: slideIn 0.25s ease-out;
+
+  .status-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .message {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  &.type-success {
+    border-left: 4px solid #10b981;
+    .status-icon {
+      color: #10b981;
+    }
+  }
+
+  &.type-error {
+    border-left: 4px solid #ef4444;
+    .status-icon {
+      color: #ef4444;
+    }
+  }
+
+  &.type-warning {
+    border-left: 4px solid #f59e0b;
+    .status-icon {
+      color: #f59e0b;
+    }
+  }
+
+  &.type-info {
+    border-left: 4px solid #3b82f6;
+    .status-icon {
+      color: #3b82f6;
+    }
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+

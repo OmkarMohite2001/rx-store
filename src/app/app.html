@@ -1,21 +1,13 @@
-<app-navbar (menuClicked)="toggleSidebar()"></app-navbar>
+<app-navbar (menuClicked)="toggleSidebar()" />
 
 <mat-sidenav-container class="sidenav-container">
-
-  <mat-sidenav
-    mode="side"
-    [opened]="sidenavOpened"
-  >
-
+  <mat-sidenav mode="side" [opened]="sidenavOpened">
     <app-sidebar />
-
   </mat-sidenav>
 
-
   <mat-sidenav-content class="content">
-
     <router-outlet />
-
   </mat-sidenav-content>
-
 </mat-sidenav-container>
+
+<app-notification />

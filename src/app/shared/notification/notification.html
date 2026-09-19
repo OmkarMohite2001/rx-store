@@ -1,0 +1,20 @@
+@if (notifications$ | async; as notifications) {
+  @if (notifications.length > 0) {
+    <div class="notification-container" aria-live="polite">
+      @for (note of notifications.slice(0, 3); track note.id) {
+        <div class="notification-item" [class]="'type-' + note.type">
+          <mat-icon class="status-icon">
+            @switch (note.type) {
+              @case ('success') { check_circle }
+              @case ('error') { error }
+              @case ('warning') { warning }
+              @default { info }
+            }
+          </mat-icon>
+          <span class="message">{{ note.message }}</span>
+        </div>
+      }
+    </div>
+  }
+}
+

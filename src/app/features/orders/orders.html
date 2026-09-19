@@ -1,1 +1,66 @@
-<p>orders works!</p>
+<div class="page-header">
+  <div>
+    <h1>My Orders</h1>
+    <p>Track your completed orders and shipment statuses</p>
+  </div>
+</div>
+
+@if (orders$ | async; as orders) {
+  @if (orders.length > 0) {
+    <div class="orders-list">
+      @for (order of orders; track order.id) {
+        <mat-card class="order-card">
+          <div class="order-header">
+            <div class="header-left">
+              <span class="order-id">{{ order.id }}</span>
+              <span class="order-date">{{ order.date | date: 'medium' }}</span>
+            </div>
+
+            <div class="header-right">
+              <span class="status-badge" [class]="'status-' + order.status.toLowerCase()">
+                {{ order.status }}
+              </span>
+              <span class="order-total">${{ order.total.toFixed(2) }}</span>
+            </div>
+          </div>
+
+          <mat-divider class="divider" />
+
+          <div class="order-items">
+            @for (item of order.items; track item.productId) {
+              <div class="order-item-row">
+                <img [src]="item.thumbnail" [alt]="item.title" class="item-thumb" />
+                <div class="item-meta">
+                  <span class="item-title">{{ item.title }}</span>
+                  <span class="item-details">Qty: {{ item.quantity }} × ${{ item.price }}</span>
+                </div>
+                <span class="item-subtotal">${{ (item.price * item.quantity).toFixed(2) }}</span>
+              </div>
+            }
+          </div>
+
+          <mat-divider class="divider" />
+
+          <div class="order-footer">
+            <div class="shipping-info">
+              <mat-icon>location_on</mat-icon>
+              <span>
+                Delivering to: <strong>{{ order.shippingAddress.fullName }}</strong>,
+                {{ order.shippingAddress.address }}, {{ order.shippingAddress.city }} ({{ order.shippingAddress.postalCode }})
+              </span>
+            </div>
+          </div>
+        </mat-card>
+      }
+    </div>
+  } @else {
+    <div class="empty-orders">
+      <mat-icon>receipt_long</mat-icon>
+      <h2>No orders yet</h2>
+      <p>When you complete a purchase, your orders will appear here.</p>
+      <button mat-flat-button color="primary" routerLink="/products">
+        Start Shopping
+      </button>
+    </div>
+  }
+}

@@ -43,3 +43,19 @@ export interface Product {
   images: string[];
   thumbnail: string;
 }
+
+export interface ProductApiResponse {
+  products: Product[];
+  total: number;
+  skip: number;
+  limit: number;
+}
+
+export interface ProductFilterState {
+  search: string;
+  category: string;
+  sortBy: string;
+  order: 'asc' | 'desc';
+  pageIndex: number;
+  pageSize: number;
+}

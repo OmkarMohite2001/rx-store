@@ -1,63 +1,92 @@
 <div class="page-header">
-
   <div>
     <h1>Dashboard</h1>
-
-    <p>
-      Welcome to RxStore
-    </p>
+    <p>Live real-time store metrics powered by RxJS</p>
   </div>
 
+  <div class="header-actions">
+    <button mat-stroked-button (click)="retry()">
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+  </div>
 </div>
 
+@if (loading$ | async) {
+  <div class="loading-container">
+    <mat-spinner diameter="40" />
+    <span>Loading dashboard statistics...</span>
+  </div>
+}
 
-<div class="dashboard-grid">
+@if (error$ | async; as errorMsg) {
+  <div class="error-banner">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ errorMsg }}</span>
+    <button mat-flat-button color="warn" (click)="retry()">
+      Retry
+    </button>
+  </div>
+}
 
-  <div class="stat-card">
-    <div class="icon">
-      <span>📦</span>
+@if (stats$ | async; as stats) {
+  <div class="dashboard-grid">
+    <div class="stat-card">
+      <div class="icon">
+        <mat-icon>inventory_2</mat-icon>
+      </div>
+      <div>
+        <h3>Total Products</h3>
+        <p class="stat-value">{{ stats.totalProducts }}</p>
+      </div>
     </div>
 
-    <div>
-      <h3>Products</h3>
-      <p>0</p>
+    <div class="stat-card">
+      <div class="icon">
+        <mat-icon>category</mat-icon>
+      </div>
+      <div>
+        <h3>Categories</h3>
+        <p class="stat-value">{{ stats.categoryCount }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="icon">
+        <mat-icon>people</mat-icon>
+      </div>
+      <div>
+        <h3>Registered Users</h3>
+        <p class="stat-value">{{ stats.userCount }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card warning">
+      <div class="icon">
+        <mat-icon>warning</mat-icon>
+      </div>
+      <div>
+        <h3>Low Stock Alerts</h3>
+        <p class="stat-value">{{ stats.lowStockCount }}</p>
+      </div>
     </div>
   </div>
 
-
-  <div class="stat-card">
-    <div class="icon">
-      <span>🛒</span>
-    </div>
-
-    <div>
-      <h3>Cart Items</h3>
-      <p>0</p>
-    </div>
+  <div class="section-title">
+    <h2>Featured Products</h2>
+    <span class="last-sync">Synced: {{ stats.lastUpdated | date: 'mediumTime' }}</span>
   </div>
 
-
-  <div class="stat-card">
-    <div class="icon">
-      <span>📋</span>
-    </div>
-
-    <div>
-      <h3>Orders</h3>
-      <p>0</p>
-    </div>
+  <div class="featured-grid">
+    @for (product of stats.featuredProducts; track product.id) {
+      <mat-card class="mini-card" [routerLink]="['/products', product.id]">
+        <img mat-card-image [src]="product.thumbnail" [alt]="product.title" />
+        <mat-card-content>
+          <h4>{{ product.title }}</h4>
+          <p class="category">{{ product.category }}</p>
+          <p class="price">${{ product.price }}</p>
+        </mat-card-content>
+      </mat-card>
+    }
   </div>
-
-
-  <div class="stat-card">
-    <div class="icon">
-      <span>👤</span>
-    </div>
-
-    <div>
-      <h3>Users</h3>
-      <p>0</p>
-    </div>
-  </div>
-
-</div>
+}

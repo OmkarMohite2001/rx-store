@@ -1,0 +1,103 @@
+<div class="page-header">
+  <div>
+    <h1>User Profile & Settings</h1>
+    <p>Reactive auto-save with <code>debounceTime</code> and <code>switchMap</code></p>
+  </div>
+
+  <div class="header-actions">
+    <!-- Auto-save status indicator -->
+    <div class="save-status-indicator" [class]="'status-' + saveStatus()">
+      @switch (saveStatus()) {
+        @case ('saving') {
+          <mat-spinner diameter="16" />
+          <span>Saving changes...</span>
+        }
+        @case ('saved') {
+          <mat-icon>check_circle</mat-icon>
+          <span>Saved automatically at {{ lastSaved() | date: 'mediumTime' }}</span>
+        }
+        @case ('error') {
+          <mat-icon>error</mat-icon>
+          <span>Error saving changes</span>
+        }
+        @default {
+          <mat-icon>cloud_done</mat-icon>
+          <span>Auto-save active</span>
+        }
+      }
+    </div>
+  </div>
+</div>
+
+<div class="profile-layout">
+  <mat-card class="profile-card">
+    <div class="card-header">
+      <div class="avatar-circle">
+        <mat-icon>account_circle</mat-icon>
+      </div>
+      <div>
+        <h2>Personal Information</h2>
+        <p>Edit any field below — changes will be saved automatically without clicking Submit.</p>
+      </div>
+    </div>
+
+    <mat-divider class="divider" />
+
+    <form [formGroup]="profileForm" class="profile-form">
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>First Name</mat-label>
+          <input matInput formControlName="firstName" />
+          @if (profileForm.get('firstName')?.hasError('required')) {
+            <mat-error>First name is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Last Name</mat-label>
+          <input matInput formControlName="lastName" />
+          @if (profileForm.get('lastName')?.hasError('required')) {
+            <mat-error>Last name is required</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Email Address</mat-label>
+          <input matInput type="email" formControlName="email" />
+          @if (profileForm.get('email')?.hasError('email')) {
+            <mat-error>Please enter a valid email</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Phone Number</mat-label>
+          <input matInput formControlName="phone" placeholder="+1 555-0100" />
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Address</mat-label>
+          <input matInput formControlName="address" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>City</mat-label>
+          <input matInput formControlName="city" />
+        </mat-form-field>
+      </div>
+    </form>
+
+    <mat-divider class="divider" />
+
+    <div class="account-actions">
+      <button mat-stroked-button color="warn" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        Sign Out
+      </button>
+    </div>
+  </mat-card>
+</div>
+

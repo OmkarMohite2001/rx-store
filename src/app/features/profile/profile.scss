@@ -1,0 +1,146 @@
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 4px 0 0;
+    color: #64748b;
+
+    code {
+      background: #e2e8f0;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+  }
+}
+
+.save-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: #f1f5f9;
+  color: #64748b;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &.status-saving {
+    background: #eff6ff;
+    color: #2563eb;
+  }
+
+  &.status-saved {
+    background: #ecfdf5;
+    color: #059669;
+
+    mat-icon {
+      color: #059669;
+    }
+  }
+
+  &.status-error {
+    background: #fef2f2;
+    color: #dc2626;
+
+    mat-icon {
+      color: #dc2626;
+    }
+  }
+}
+
+.profile-layout {
+  max-width: 760px;
+}
+
+.profile-card {
+  padding: 32px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  background: white;
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+
+    .avatar-circle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #eff6ff;
+      color: #3b82f6;
+
+      mat-icon {
+        font-size: 40px;
+        width: 40px;
+        height: 40px;
+      }
+    }
+
+    h2 {
+      margin: 0 0 4px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    p {
+      margin: 0;
+      font-size: 13px;
+      color: #64748b;
+    }
+  }
+
+  .divider {
+    margin: 24px 0;
+  }
+
+  .profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .form-row {
+      display: flex;
+      gap: 16px;
+
+      .half-width {
+        flex: 1;
+      }
+    }
+  }
+
+  .account-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 600px) {
+  .profile-card .profile-form .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+}
+

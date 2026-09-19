@@ -1,70 +1,170 @@
-<div class="back-link">
-
-  <a routerLink="/products">
-    ← Back to Products
-  </a>
-
+<div class="navigation-bar">
+  <button mat-button routerLink="/products">
+    <mat-icon>arrow_back</mat-icon>
+    Back to Products
+  </button>
 </div>
 
+@if (loading$ | async) {
+  <div class="loading-state">
+    <mat-spinner diameter="48" />
+    <p>Loading product details...</p>
+  </div>
+}
+
+@if (error$ | async; as errorMsg) {
+  <div class="error-banner">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ errorMsg }}</span>
+    <button mat-flat-button color="warn" (click)="retry()">
+      Retry
+    </button>
+  </div>
+}
 
 @if (product$ | async; as product) {
+  <div class="details-container">
+    <div class="details-grid">
+      <!-- Media Gallery -->
+      <div class="gallery-section">
+        <div class="main-image-wrapper">
+          <img
+            [src]="product.images && product.images.length > selectedImageIndex() ? product.images[selectedImageIndex()] : product.thumbnail"
+            [alt]="product.title"
+            class="main-image"
+          />
+        </div>
 
-  <mat-card class="product-details-card">
-
-    <div class="product-image">
-
-      <img
-        [src]="product.thumbnail"
-        [alt]="product.title"
-      />
-
-    </div>
-
-
-    <div class="product-info">
-
-      <h1>
-        {{ product.title }}
-      </h1>
-
-      <p class="category">
-        {{ product.category }}
-      </p>
-
-      <p class="description">
-        {{ product.description }}
-      </p>
-
-      <p class="price">
-        ₹{{ product.price }}
-      </p>
-
-      <p>
-        Rating: {{ product.rating }}
-      </p>
-
-      <p>
-        Stock: {{ product.stock }}
-      </p>
-
-
-      <div class="actions">
-
-        <button
-          matButton
-          routerLink="/products"
-        >
-          Back to Products
-        </button>
-
-        <button matButton>
-          Add to Cart
-        </button>
-
+        @if (product.images && product.images.length > 1) {
+          <div class="thumbnails-row">
+            @for (img of product.images; track img; let idx = $index) {
+              <img
+                [src]="img"
+                [alt]="product.title"
+                class="thumb-img"
+                [class.active]="selectedImageIndex() === idx"
+                (click)="selectImage(idx)"
+              />
+            }
+          </div>
+        }
       </div>
 
+      <!-- Info Section -->
+      <div class="info-section">
+        <div class="brand-category">
+          <span class="brand">{{ product.brand || 'RxStore Exclusive' }}</span>
+          <span class="category-chip">{{ product.category }}</span>
+        </div>
+
+        <h1 class="title">{{ product.title }}</h1>
+
+        <div class="rating-stock-row">
+          <span class="rating">★ {{ product.rating }} / 5</span>
+          <span class="availability" [class.in-stock]="product.stock > 0">
+            {{ product.availabilityStatus || (product.stock > 0 ? 'In Stock' : 'Out of Stock') }} ({{ product.stock }} units)
+          </span>
+        </div>
+
+        <div class="price-section">
+          <span class="current-price">${{ product.price }}</span>
+          @if (product.discountPercentage > 0) {
+            <span class="discount-badge">{{ product.discountPercentage }}% OFF</span>
+          }
+        </div>
+
+        <p class="description">{{ product.description }}</p>
+
+        <mat-divider class="divider" />
+
+        <div class="meta-specs">
+          <div class="spec-item">
+            <mat-icon>verified</mat-icon>
+            <div>
+              <strong>Warranty:</strong>
+              <span>{{ product.warrantyInformation || '1 Year Standard Warranty' }}</span>
+            </div>
+          </div>
+
+          <div class="spec-item">
+            <mat-icon>local_shipping</mat-icon>
+            <div>
+              <strong>Shipping:</strong>
+              <span>{{ product.shippingInformation || 'Free Standard Delivery' }}</span>
+            </div>
+          </div>
+
+          <div class="spec-item">
+            <mat-icon>assignment_return</mat-icon>
+            <div>
+              <strong>Return Policy:</strong>
+              <span>{{ product.returnPolicy || '30 days return window' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <mat-divider class="divider" />
+
+        <!-- Quantity & Add to Cart (Phase 16 withLatestFrom) -->
+        <div class="action-row">
+          <div class="quantity-picker">
+            <button
+              mat-icon-button
+              (click)="changeQuantity(-1)"
+              [disabled]="quantity() <= 1"
+            >
+              <mat-icon>remove</mat-icon>
+            </button>
+            <span class="qty-display">{{ quantity() }}</span>
+            <button
+              mat-icon-button
+              (click)="changeQuantity(1)"
+              [disabled]="quantity() >= product.stock"
+            >
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+
+          <button
+            mat-flat-button
+            color="primary"
+            class="add-cart-btn"
+            (click)="onAddToCart()"
+            [disabled]="product.stock === 0"
+          >
+            <mat-icon>shopping_cart</mat-icon>
+            Add to Cart (withLatestFrom)
+          </button>
+        </div>
+      </div>
     </div>
 
-  </mat-card>
+    <!-- Reviews Section -->
+    <div class="reviews-section">
+      <h2>Customer Reviews ({{ product.reviews ? product.reviews.length : 0 }})</h2>
 
+      @if (product.reviews && product.reviews.length > 0) {
+        <div class="reviews-grid">
+          @for (review of product.reviews; track review.date + review.reviewerName) {
+            <mat-card class="review-card">
+              <mat-card-header>
+                <div class="review-header">
+                  <div class="reviewer-info">
+                    <strong>{{ review.reviewerName }}</strong>
+                    <span class="review-date">{{ review.date | date: 'mediumDate' }}</span>
+                  </div>
+                  <span class="review-stars">★ {{ review.rating }}/5</span>
+                </div>
+              </mat-card-header>
+              <mat-card-content>
+                <p class="review-comment">"{{ review.comment }}"</p>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      } @else {
+        <p class="no-reviews">No reviews yet for this product.</p>
+      }
+    </div>
+  </div>
 }

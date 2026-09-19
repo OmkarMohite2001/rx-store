@@ -1,1 +1,101 @@
-<p>cart works!</p>
+<div class="page-header">
+  <div>
+    <h1>Shopping Cart</h1>
+    <p>Reactive state management using BehaviorSubject and derived selectors</p>
+  </div>
+</div>
+
+@if (isEmpty$ | async) {
+  <div class="empty-cart">
+    <mat-icon>remove_shopping_cart</mat-icon>
+    <h2>Your cart is empty</h2>
+    <p>Discover products in our store and add them to your cart.</p>
+    <button mat-flat-button color="primary" routerLink="/products">
+      Browse Products
+    </button>
+  </div>
+} @else {
+  <div class="cart-layout">
+    <!-- Items List -->
+    <div class="cart-items-column">
+      @if (items$ | async; as items) {
+        @for (item of items; track item.product.id) {
+          <mat-card class="cart-item-card">
+            <img [src]="item.product.thumbnail" [alt]="item.product.title" class="item-thumb" />
+
+            <div class="item-details">
+              <h3 [routerLink]="['/products', item.product.id]">{{ item.product.title }}</h3>
+              <p class="category">{{ item.product.category }}</p>
+              <p class="unit-price">${{ item.product.price }} each</p>
+            </div>
+
+            <div class="quantity-controls">
+              <button mat-icon-button (click)="decrease(item.product.id)">
+                <mat-icon>remove</mat-icon>
+              </button>
+              <span class="quantity">{{ item.quantity }}</span>
+              <button mat-icon-button (click)="increase(item.product.id)">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+
+            <div class="line-total">
+              ${{ (item.product.price * item.quantity).toFixed(2) }}
+            </div>
+
+            <button mat-icon-button color="warn" (click)="remove(item.product.id)" aria-label="Remove item">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          </mat-card>
+        }
+      }
+
+      <div class="cart-actions-row">
+        <button mat-stroked-button color="warn" (click)="clear()">
+          <mat-icon>delete_sweep</mat-icon>
+          Clear Cart
+        </button>
+      </div>
+    </div>
+
+    <!-- Summary Column -->
+    <div class="summary-column">
+      <mat-card class="summary-card">
+        <h2>Order Summary</h2>
+        <mat-divider class="divider" />
+
+        <div class="summary-row">
+          <span>Total Items:</span>
+          <strong>{{ (cartCount$ | async) ?? 0 }}</strong>
+        </div>
+
+        <!-- Pairwise operator demonstration (Phase 20) -->
+        @if (totalDifference$ | async; as diff) {
+          @if (diff.difference !== 0) {
+            <div class="diff-badge" [class.increase]="diff.difference > 0" [class.decrease]="diff.difference < 0">
+              <mat-icon>{{ diff.difference > 0 ? 'trending_up' : 'trending_down' }}</mat-icon>
+              <span>
+                {{ diff.difference > 0 ? '+' : '' }}${{ diff.difference.toFixed(2) }} from previous
+              </span>
+            </div>
+          }
+        }
+
+        <div class="summary-row total-row">
+          <span>Estimated Total:</span>
+          <span class="total-amount">${{ ((cartTotal$ | async) ?? 0).toFixed(2) }}</span>
+        </div>
+
+        <button mat-flat-button color="primary" class="checkout-btn" routerLink="/checkout">
+          <mat-icon>lock</mat-icon>
+          Proceed to Checkout
+        </button>
+
+        <p class="secure-note">
+          <mat-icon>verified_user</mat-icon>
+          Protected by Angular functional Auth Guard
+        </p>
+      </mat-card>
+    </div>
+  </div>
+}
